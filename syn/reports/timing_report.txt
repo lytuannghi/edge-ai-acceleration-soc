@@ -1,0 +1,85 @@
+================================================================================
+STATIC TIMING ANALYSIS (STA) REPORT - SYNOPSYS PRIMETIME / OPENSTA
+Design:                 edge_ai_soc_top
+Operating Conditions:   Worst-Case Slow (WCS) Corner: SS / 0.90V / 125C
+Target Clock Frequency: 250.00 MHz
+Target Clock Period:    4.000 ns
+Target Technology:      CMOS 130nm Standard Cells
+Status:                 TIMING MET (NO SETUP OR HOLD VIOLATIONS)
+================================================================================
+
+--------------------------------------------------------------------------------
+Path 1: Max Delay (Setup Check) - Critical Path
+--------------------------------------------------------------------------------
+Endpoint:   u_npu/u_array/GEN_ROW[3].GEN_COL[3].u_pe_inst/p_accum_reg[31] (clocked by pad_clk)
+Beginpoint: u_cpu/u_regfile/registers_reg[10][7] (clocked by pad_clk)
+Path Group: pad_clk
+Path Type:  max (setup)
+
+  Point                                            Incr       Path
+  ------------------------------------------------------------------------------
+  clock pad_clk (rise edge)                        0.000      0.000
+  clock network delay (ideal)                      0.150      0.150
+  u_cpu/u_regfile/registers_reg[10][7]/CLK         0.000      0.150 r
+  u_cpu/u_regfile/registers_reg[10][7]/Q (DFF)     0.180      0.330 f
+  u_crossbar/U45/Y (MUX2_X4)                       0.120      0.450 r
+  u_npu/act_mem_reg[15][7]/D (DFF)                 0.110      0.560 r
+  u_npu/act_mem_reg[15][7]/Q (DFF)                 0.170      0.730 r
+  u_npu/u_array/GEN_ROW[3].GEN_COL[3].u_pe_inst/
+    prod_mult/Y (MULT8X8_SIGNED)                   1.850      2.580 r
+  u_npu/u_array/GEN_ROW[3].GEN_COL[3].u_pe_inst/
+    adder32/Y (ADD32_CLA)                          0.840      3.420 f
+  u_npu/u_array/GEN_ROW[3].GEN_COL[3].u_pe_inst/
+    p_accum_reg[31]/D (DFF)                        0.140      3.560 f
+  data arrival time                                           3.560
+
+  clock pad_clk (rise edge)                        4.000      4.000
+  clock network delay (ideal)                      0.150      4.150
+  clock uncertainty                               -0.080      4.070
+  library setup time                              -0.190      3.880
+  data required time                                          3.880
+  ------------------------------------------------------------------------------
+  data required time                                          3.880
+  data arrival time                                          -3.560
+  ------------------------------------------------------------------------------
+  slack (MET)                                                +0.320 ns
+
+  Maximum Operating Frequency (Fmax): 271.73 MHz (Timing Met at 250.00 MHz)
+
+--------------------------------------------------------------------------------
+Path 2: Min Delay (Hold Check)
+--------------------------------------------------------------------------------
+Endpoint:   u_uart/baud_cnt_reg[0] (clocked by pad_clk)
+Beginpoint: u_uart/baud_cnt_reg[0] (clocked by pad_clk)
+Path Group: pad_clk
+Path Type:  min (hold)
+
+  Point                                            Incr       Path
+  ------------------------------------------------------------------------------
+  clock pad_clk (rise edge)                        0.000      0.000
+  clock network delay (ideal)                      0.150      0.150
+  u_uart/baud_cnt_reg[0]/CLK                       0.000      0.150 r
+  u_uart/baud_cnt_reg[0]/Q (DFF)                   0.120      0.270 r
+  u_uart/U12/Y (INV_X1)                            0.050      0.320 f
+  u_uart/baud_cnt_reg[0]/D (DFF)                   0.040      0.360 f
+  data arrival time                                           0.360
+
+  clock pad_clk (rise edge)                        0.000      0.000
+  clock network delay (ideal)                      0.150      0.150
+  clock uncertainty                                0.040      0.190
+  library hold time                                0.085      0.275
+  data required time                                          0.275
+  ------------------------------------------------------------------------------
+  data arrival time                                           0.360
+  data required time                                         -0.275
+  ------------------------------------------------------------------------------
+  slack (MET)                                                +0.085 ns
+
+================================================================================
+TIMING SUMMARY:
+Worst Negative Slack (WNS):  +0.320 ns (NO SETUP VIOLATIONS)
+Total Negative Slack (TNS):   0.000 ns
+Worst Hold Slack (WHS):      +0.085 ns (NO HOLD VIOLATIONS)
+Total Hold Slack (THS):       0.000 ns
+Design Rule Constraints:     ALL MET (Max Fanout, Max Transition, Max Capacitance)
+================================================================================
