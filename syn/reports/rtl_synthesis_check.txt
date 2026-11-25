@@ -1,0 +1,36 @@
+================================================================================
+RTL SYNTHESIS READINESS & CONSTRAINT REPORT: edge-ai-acceleration-soc
+Method : Static Verilog/SV Structural Parser + SDC Constraint Audit
+Note   : Foundry Gate-Level Netlist & STA require PDK Liberty (.lib) + Synopsys/OpenROAD
+================================================================================
+RTL Source Files Inspected : 18
+Code Lines (Non-Comment)   : 1420
+Sequential Blocks          : 18
+Combinational Blocks       : 4
+Declared reg/logic Signals : 80
+
+MODULE BREAKDOWN:
+  rtl\bus\apb_bridge.v                          | modules=apb_bridge                   | loc=  74 | seq= 1 | comb= 1
+  rtl\bus\axi_crossbar.v                        | modules=axi_crossbar                 | loc=  84 | seq= 2 | comb= 1
+  rtl\cpu\alu_mul_div.v                         | modules=alu_mul_div                  | loc= 104 | seq= 1 | comb= 0
+  rtl\cpu\riscv_alu.v                           | modules=riscv_alu                    | loc=  28 | seq= 0 | comb= 1
+  rtl\cpu\riscv_core.v                          | modules=riscv_core                   | loc= 225 | seq= 1 | comb= 1
+  rtl\cpu\riscv_regfile.v                       | modules=riscv_regfile                | loc=  28 | seq= 1 | comb= 0
+  rtl\edge_ai_soc_top.v                         | modules=edge_ai_soc_top              | loc= 250 | seq= 0 | comb= 0
+  rtl\mem\boot_rom.v                            | modules=boot_rom                     | loc=  13 | seq= 0 | comb= 0
+  rtl\mem\system_sram.v                         | modules=system_sram                  | loc=  24 | seq= 1 | comb= 0
+  rtl\npu\activation_relu.v                     | modules=activation_relu              | loc=  32 | seq= 1 | comb= 0
+  rtl\npu\npu_top.v                             | modules=npu_top                      | loc= 181 | seq= 2 | comb= 0
+  rtl\npu\pe.v                                  | modules=pe                           | loc=  29 | seq= 1 | comb= 0
+  rtl\npu\systolic_array_4x4.v                  | modules=systolic_array_4x4           | loc=  53 | seq= 0 | comb= 0
+  rtl\padframe\chip_padring.v                   | modules=chip_padring                 | loc=  39 | seq= 0 | comb= 0
+  rtl\peripherals\gpio_controller.v             | modules=gpio_controller              | loc=  33 | seq= 1 | comb= 0
+  rtl\peripherals\spi_master.v                  | modules=spi_master                   | loc=  69 | seq= 1 | comb= 0
+  rtl\peripherals\timer_32bit.v                 | modules=timer_32bit                  | loc=  49 | seq= 1 | comb= 0
+  rtl\peripherals\uart_controller.v             | modules=uart_controller              | loc= 105 | seq= 4 | comb= 0
+
+SDC CLOCK CONSTRAINTS:
+  (No create_clock constraints found)
+
+ARITHMETIC DIVISION/MODULO CHECK: CLEAN (0 combinational / or % operators)
+================================================================================

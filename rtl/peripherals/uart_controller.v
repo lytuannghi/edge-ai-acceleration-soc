@@ -120,10 +120,10 @@ module uart_controller (
         if (!rst_n) begin
             baud_div <= 16'd16; // Default divider
             prdata   <= 32'd0;
-        end else if (psel && penable) begin
-            if (pwrite) begin
+        end else if (psel) begin
+            if (penable && pwrite) begin
                 if (paddr == 8'h08) baud_div <= pwdata[15:0];
-            end else begin
+            end else if (!penable && !pwrite) begin
                 case (paddr)
                     8'h00: prdata <= {24'd0, rx_byte_reg};
                     8'h04: prdata <= {29'd0, !tx_busy, !rx_has_data, tx_busy};

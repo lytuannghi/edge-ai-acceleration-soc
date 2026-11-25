@@ -59,6 +59,24 @@ module npu_top (
         .p_out_30(p_out[3][0]), .p_out_31(p_out[3][1]), .p_out_32(p_out[3][2]), .p_out_33(p_out[3][3])
     );
 
+    // Hardware ReLU & INT8 Quantization Post-Processors (16 parallel channels)
+    wire [7:0] relu_out [0:3][0:3];
+    genvar rr, rc;
+    generate
+        for (rr = 0; rr < 4; rr = rr + 1) begin : GEN_RELU_R
+            for (rc = 0; rc < 4; rc = rc + 1) begin : GEN_RELU_C
+                activation_relu u_relu (
+                    .clk         (clk),
+                    .rst_n       (rst_n),
+                    .enable_relu (ctrl_reg[2]),
+                    .shift_quant (shift_quant),
+                    .data_in     (p_out[rr][rc]),
+                    .data_out    (relu_out[rr][rc])
+                );
+            end
+        end
+    endgenerate
+
     // Execution Sequencer FSM
     localparam IDLE    = 3'b000;
     localparam RUN     = 3'b001;
@@ -163,8 +181,8 @@ module npu_top (
                 act_mem[idx] <= 8'sd0;
                 wgt_mem[idx] <= 8'sd0;
             end
-        end else if (psel && penable) begin
-            if (pwrite) begin
+        end else if (psel) begin
+            if (penable && pwrite) begin
                 if (paddr == 12'h000) ctrl_reg    <= pwdata;
                 if (paddr == 12'h008) shift_quant <= pwdata[3:0];
                 if (paddr >= 12'h100 && paddr < 12'h140) begin
@@ -173,7 +191,7 @@ module npu_top (
                 if (paddr >= 12'h200 && paddr < 12'h240) begin
                     wgt_mem[(paddr - 12'h200) >> 2] <= pwdata[7:0];
                 end
-            end else begin
+            end else if (!penable && !pwrite) begin
                 case (paddr)
                     12'h000: prdata <= ctrl_reg;
                     12'h004: prdata <= status_reg;
@@ -186,6 +204,10 @@ module npu_top (
                     12'h328: prdata <= p_out[2][2]; 12'h32C: prdata <= p_out[2][3];
                     12'h330: prdata <= p_out[3][0]; 12'h334: prdata <= p_out[3][1];
                     12'h338: prdata <= p_out[3][2]; 12'h33C: prdata <= p_out[3][3];
+                    12'h340: prdata <= {relu_out[0][3], relu_out[0][2], relu_out[0][1], relu_out[0][0]};
+                    12'h344: prdata <= {relu_out[1][3], relu_out[1][2], relu_out[1][1], relu_out[1][0]};
+                    12'h348: prdata <= {relu_out[2][3], relu_out[2][2], relu_out[2][1], relu_out[2][0]};
+                    12'h34C: prdata <= {relu_out[3][3], relu_out[3][2], relu_out[3][1], relu_out[3][0]};
                     default: prdata <= 32'd0;
                 endcase
             end

@@ -61,8 +61,14 @@ module axi_crossbar (
     assign rom_cs     = cpu_req && sel_rom;
     assign rom_addr   = cpu_addr[12:0];
 
+    reg sram_ready_reg;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) sram_ready_reg <= 1'b0;
+        else sram_ready_reg <= cpu_req && sel_sram && !sram_ready_reg;
+    end
+
     assign sram_cs    = cpu_req && sel_sram;
-    assign sram_wr    = cpu_wr;
+    assign sram_wr    = cpu_wr && !sram_ready_reg;
     assign sram_wstrb = cpu_wstrb;
     assign sram_addr  = cpu_addr[13:0];
     assign sram_wdata = cpu_wdata;
@@ -91,7 +97,7 @@ module axi_crossbar (
             cpu_ready = 1'b1;
         end else if (sel_sram) begin
             cpu_rdata = sram_rdata;
-            cpu_ready = 1'b1;
+            cpu_ready = sram_ready_reg;
         end else if (sel_npu) begin
             cpu_rdata = npu_prdata;
             cpu_ready = npu_pready && npu_penable;

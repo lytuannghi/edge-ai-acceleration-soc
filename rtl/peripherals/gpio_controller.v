@@ -32,11 +32,11 @@ module gpio_controller (
             gpio_out <= 16'd0;
             gpio_dir <= 16'd0;
             prdata   <= 32'd0;
-        end else if (psel && penable) begin
-            if (pwrite) begin
+        end else if (psel) begin
+            if (penable && pwrite) begin
                 if (paddr == 8'h00) gpio_out <= pwdata[15:0];
                 if (paddr == 8'h04) gpio_dir <= pwdata[15:0];
-            end else begin
+            end else if (!penable && !pwrite) begin
                 case (paddr)
                     8'h00: prdata <= {16'd0, gpio_in};
                     8'h04: prdata <= {16'd0, gpio_dir};

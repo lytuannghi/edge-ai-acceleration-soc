@@ -65,12 +65,43 @@ module riscv_core (
         .rd_data (reg_wr_data)
     );
 
-    // ALU Signals
+    // Combinational ALU Controls (valid in S_EXEC so ALU result settles same cycle)
     reg  [3:0]  alu_op;
     reg  [31:0] alu_op_a;
     reg  [31:0] alu_op_b;
     wire [31:0] alu_result;
     wire        alu_zero;
+
+    always @(*) begin
+        alu_op_a = rs1_data;
+        alu_op_b = (opcode == `OPCODE_I_TYPE) ? imm_i : rs2_data;
+        alu_op   = `ALU_ADD;
+        if (opcode == `OPCODE_I_TYPE) begin
+            case (funct3)
+                3'b000: alu_op = `ALU_ADD;
+                3'b010: alu_op = `ALU_SLT;
+                3'b011: alu_op = `ALU_SLTU;
+                3'b100: alu_op = `ALU_XOR;
+                3'b110: alu_op = `ALU_OR;
+                3'b111: alu_op = `ALU_AND;
+                3'b001: alu_op = `ALU_SLL;
+                3'b101: alu_op = funct7[5] ? `ALU_SRA : `ALU_SRL;
+                default: alu_op = `ALU_ADD;
+            endcase
+        end else if (opcode == `OPCODE_R_TYPE) begin
+            case (funct3)
+                3'b000: alu_op = funct7[5] ? `ALU_SUB : `ALU_ADD;
+                3'b001: alu_op = `ALU_SLL;
+                3'b010: alu_op = `ALU_SLT;
+                3'b011: alu_op = `ALU_SLTU;
+                3'b100: alu_op = `ALU_XOR;
+                3'b101: alu_op = funct7[5] ? `ALU_SRA : `ALU_SRL;
+                3'b110: alu_op = `ALU_OR;
+                3'b111: alu_op = `ALU_AND;
+                default: alu_op = `ALU_ADD;
+            endcase
+        end
+    end
 
     riscv_alu u_alu (
         .alu_op   (alu_op),
@@ -80,28 +111,30 @@ module riscv_core (
         .zero     (alu_zero)
     );
 
+    // Multi-cycle execution FSM: FETCH -> EXECUTE -> MEM_WAIT / M_WAIT
+    localparam S_FETCH    = 2'b00;
+    localparam S_EXEC     = 2'b01;
+    localparam S_MEM_WAIT = 2'b10;
+    localparam S_M_WAIT   = 2'b11;
+
+    reg [1:0] state;
+
     // Hardware Multiplier / Divider (M-Extension)
     wire is_m_extension = (opcode == `OPCODE_R_TYPE) && (funct7 == 7'b0000001);
+    wire mul_div_start  = (state == S_EXEC) && is_m_extension;
     wire [31:0] mul_div_result;
     wire        mul_div_ready;
 
     alu_mul_div u_mul_div (
         .clk      (clk),
         .rst_n    (rst_n),
-        .start    (is_m_extension),
+        .start    (mul_div_start),
         .funct3   (funct3),
         .operand_a(rs1_data),
         .operand_b(rs2_data),
         .result   (mul_div_result),
         .ready    (mul_div_ready)
     );
-
-    // Multi-cycle execution FSM: FETCH -> EXECUTE -> MEM_WAIT
-    localparam S_FETCH    = 2'b00;
-    localparam S_EXEC     = 2'b01;
-    localparam S_MEM_WAIT = 2'b10;
-
-    reg [1:0] state;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -115,9 +148,6 @@ module riscv_core (
             data_wstrb <= 4'b0000;
             reg_wr_en  <= 1'b0;
             reg_wr_data<= 32'd0;
-            alu_op     <= `ALU_ADD;
-            alu_op_a   <= 32'd0;
-            alu_op_b   <= 32'd0;
         end else begin
             case (state)
                 S_FETCH: begin
@@ -171,19 +201,6 @@ module riscv_core (
                         end
 
                         `OPCODE_I_TYPE: begin
-                            alu_op_a <= rs1_data;
-                            alu_op_b <= imm_i;
-                            case (funct3)
-                                3'b000: alu_op <= `ALU_ADD; // ADDI
-                                3'b010: alu_op <= `ALU_SLT; // SLTI
-                                3'b011: alu_op <= `ALU_SLTU;// SLTIU
-                                3'b100: alu_op <= `ALU_XOR; // XORI
-                                3'b110: alu_op <= `ALU_OR;  // ORI
-                                3'b111: alu_op <= `ALU_AND; // ANDI
-                                3'b001: alu_op <= `ALU_SLL; // SLLI
-                                3'b101: alu_op <= funct7[5] ? `ALU_SRA : `ALU_SRL; // SRAI / SRLI
-                                default: alu_op <= `ALU_ADD;
-                            endcase
                             reg_wr_en   <= 1'b1;
                             reg_wr_data <= alu_result;
                             pc          <= pc + 4;
@@ -192,27 +209,13 @@ module riscv_core (
 
                         `OPCODE_R_TYPE: begin
                             if (is_m_extension) begin
-                                reg_wr_en   <= 1'b1;
-                                reg_wr_data <= mul_div_result;
+                                state <= S_M_WAIT;
                             end else begin
-                                alu_op_a <= rs1_data;
-                                alu_op_b <= rs2_data;
-                                case (funct3)
-                                    3'b000: alu_op <= funct7[5] ? `ALU_SUB : `ALU_ADD;
-                                    3'b001: alu_op <= `ALU_SLL;
-                                    3'b010: alu_op <= `ALU_SLT;
-                                    3'b011: alu_op <= `ALU_SLTU;
-                                    3'b100: alu_op <= `ALU_XOR;
-                                    3'b101: alu_op <= funct7[5] ? `ALU_SRA : `ALU_SRL;
-                                    3'b110: alu_op <= `ALU_OR;
-                                    3'b111: alu_op <= `ALU_AND;
-                                    default: alu_op <= `ALU_ADD;
-                                endcase
                                 reg_wr_en   <= 1'b1;
                                 reg_wr_data <= alu_result;
+                                pc          <= pc + 4;
+                                state       <= S_FETCH;
                             end
-                            pc    <= pc + 4;
-                            state <= S_FETCH;
                         end
 
                         `OPCODE_LOAD: begin
@@ -250,6 +253,15 @@ module riscv_core (
                         end
                         pc    <= pc + 4;
                         state <= S_FETCH;
+                    end
+                end
+
+                S_M_WAIT: begin
+                    if (mul_div_ready) begin
+                        reg_wr_en   <= 1'b1;
+                        reg_wr_data <= mul_div_result;
+                        pc          <= pc + 4;
+                        state       <= S_FETCH;
                     end
                 end
             endcase
