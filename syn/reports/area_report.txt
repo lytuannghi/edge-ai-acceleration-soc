@@ -1,43 +1,41 @@
 ================================================================================
-SYNTHESIS HIERARCHICAL AREA REPORT
-Design:             edge_ai_soc_top
-Technology Library: CMOS 130nm Multi-Metal Standard Cell Library
-Units:              Area in um^2, Gate Equivalent in 2-input NAND gates (NAND2_X1)
+RTL STRUCTURAL & SYNTHESIS READINESS SUMMARY: edge_ai_soc_top
+Target Library Constraints: SkyWater 130nm HD Standard Cells (SDC)
 ================================================================================
 
---------------------------------------------------------------------------------
-Hierarchy Module Breakdown
---------------------------------------------------------------------------------
-Module Instance           Gate Count  Combinational  Sequential  Total Area (um^2)  % Area
---------------------------------------------------------------------------------
-edge_ai_soc_top               65,420         42,523      22,897         205,418.00  100.0%
-|-- u_cpu (RV32IM Core)       21,350         14,945       6,405          67,039.00   32.6%
-|   |-- u_regfile              4,800            960       3,840          15,072.00    7.3%
-|   |-- u_alu                  5,120          5,120           0          16,076.80    7.8%
-|   `-- u_mul_div              8,450          6,760       1,690          26,533.00   12.9%
-|-- u_npu (Edge-AI Coproc)    24,800         16,120       8,680          77,872.00   37.9%
-|   |-- u_array (4x4 PEs)     18,400         11,960       6,440          57,776.00   28.1%
-|   |-- act_mem & wgt_mem      3,200            640       2,560          10,048.00    4.9%
-|   `-- u_relu_quant           1,850          1,480         370           5,809.00    2.8%
-|-- u_crossbar & u_apb         4,250          3,825         425          13,345.00    6.5%
-|-- u_rom & u_sram             7,800          3,120       4,680          24,492.00   11.9%
-|-- Peripherals Subsystem      4,620          2,772       1,848          14,506.80    7.1%
-|   |-- u_uart                 1,850          1,110         740           5,809.00    2.8%
-|   |-- u_spi                  1,240            744         496           3,893.60    1.9%
-|   |-- u_timer                  820            492         328           2,574.80    1.3%
-|   `-- u_gpio                   710            426         284           2,229.40    1.1%
-`-- u_padring (64 Pads & ESD)  2,600          1,741         859           8,163.20    4.0%
+================================================================================
+RTL SYNTHESIS READINESS & CONSTRAINT REPORT: edge-ai-acceleration-soc
+Method : Static Verilog/SV Structural Parser + SDC Constraint Audit
+Note   : Foundry Gate-Level Netlist & STA require PDK Liberty (.lib) + Synopsys/OpenROAD
+================================================================================
+RTL Source Files Inspected : 18
+Code Lines (Non-Comment)   : 1420
+Sequential Blocks          : 18
+Combinational Blocks       : 4
+Declared reg/logic Signals : 80
 
---------------------------------------------------------------------------------
-CELL TYPE DISTRIBUTION
---------------------------------------------------------------------------------
-Cell Category                 Count     Percentage
-Inverters / Buffers           14,250         21.8%
-NAND / AND Gates              13,100         20.0%
-NOR / OR Gates                 7,450         11.4%
-AOI / OAI Complex Gates        9,820         15.0%
-Multiplexers (MUX2, MUX4)      6,100          9.3%
-Flip-Flops (DFF, DFFR, DFFS)  14,700         22.5%
---------------------------------------------------------------------------------
-Total Standard Cells          65,420        100.0%
+MODULE BREAKDOWN:
+  rtl\bus\apb_bridge.v                          | modules=apb_bridge                   | loc=  74 | seq= 1 | comb= 1
+  rtl\bus\axi_crossbar.v                        | modules=axi_crossbar                 | loc=  84 | seq= 2 | comb= 1
+  rtl\cpu\alu_mul_div.v                         | modules=alu_mul_div                  | loc= 104 | seq= 1 | comb= 0
+  rtl\cpu\riscv_alu.v                           | modules=riscv_alu                    | loc=  28 | seq= 0 | comb= 1
+  rtl\cpu\riscv_core.v                          | modules=riscv_core                   | loc= 225 | seq= 1 | comb= 1
+  rtl\cpu\riscv_regfile.v                       | modules=riscv_regfile                | loc=  28 | seq= 1 | comb= 0
+  rtl\edge_ai_soc_top.v                         | modules=edge_ai_soc_top              | loc= 250 | seq= 0 | comb= 0
+  rtl\mem\boot_rom.v                            | modules=boot_rom                     | loc=  13 | seq= 0 | comb= 0
+  rtl\mem\system_sram.v                         | modules=system_sram                  | loc=  24 | seq= 1 | comb= 0
+  rtl\npu\activation_relu.v                     | modules=activation_relu              | loc=  32 | seq= 1 | comb= 0
+  rtl\npu\npu_top.v                             | modules=npu_top                      | loc= 181 | seq= 2 | comb= 0
+  rtl\npu\pe.v                                  | modules=pe                           | loc=  29 | seq= 1 | comb= 0
+  rtl\npu\systolic_array_4x4.v                  | modules=systolic_array_4x4           | loc=  53 | seq= 0 | comb= 0
+  rtl\padframe\chip_padring.v                   | modules=chip_padring                 | loc=  39 | seq= 0 | comb= 0
+  rtl\peripherals\gpio_controller.v             | modules=gpio_controller              | loc=  33 | seq= 1 | comb= 0
+  rtl\peripherals\spi_master.v                  | modules=spi_master                   | loc=  69 | seq= 1 | comb= 0
+  rtl\peripherals\timer_32bit.v                 | modules=timer_32bit                  | loc=  49 | seq= 1 | comb= 0
+  rtl\peripherals\uart_controller.v             | modules=uart_controller              | loc= 105 | seq= 4 | comb= 0
+
+SDC CLOCK CONSTRAINTS:
+  (No create_clock constraints found)
+
+ARITHMETIC DIVISION/MODULO CHECK: CLEAN (0 combinational / or % operators)
 ================================================================================

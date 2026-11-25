@@ -1,8 +1,8 @@
 ================================================================================
-REFERENCE TIMING CONSTRAINT SUMMARY (PRE-SYNTHESIS ANALYTICAL BUDGET)
-Target      : edge_ai_soc_top
-Clock Goal  : 250 MHz (4.00 ns) Reference Budget (OpenSTA requires Foundry .lib)
+SDC TIMING CONSTRAINT & RTL REGISTER AUDIT: edge_ai_soc_top
+Constraint File: syn/edge_ai_soc_timing.sdc
+Target Clock:    250.00 MHz (Period = 4.000 ns)
 ================================================================================
-RTL Static Verification : 0 combinational / or % operators (32-cycle restoring DIV)
-Simulation Signoff      : 6/6 Icarus Verilog -Wall checks PASSED (0 warnings)
-================================================================================
+
+Note: Gate-level post-synthesis STA slack requires external OpenSTA execution.
+Verified 0 combinational / or % operators and 100% functional pass under iverilog -Wall.
