@@ -3,7 +3,7 @@ GDSII STRUCTURAL EXTRACTION & PIN CONNECTIVITY REFERENCE REPORT
 Project     : Aether-AI Edge SoC
 Target      : edge_ai_soc_top
 GDSII File  : layout/gds/edge_ai_soc_top.gds (728,006 bytes)
-Note        : Full foundry Netgen/Calibre LVS requires PDK SPICE extraction
+Note        : External Magic/Netgen required for SPICE extraction & transistor LVS
 ================================================================================
 
 Die Bounding Box      : (0.00, 0.00) um to (720.00, 720.00) um
